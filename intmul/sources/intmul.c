@@ -172,10 +172,6 @@ static char *combineResults(char *ah_bh, char *ah_bl, char *al_bh, char *al_bl, 
 }
 
 static char *addNumbers(char *num1, int shift1, char *num2){
-	
-	if(shift1 == 8){
-		int asdf;
-	}
 
 	if(num1[strlen(num1)-1] == '\n'){
 		num1[strlen(num1)-1] = '\0';
@@ -188,8 +184,6 @@ static char *addNumbers(char *num1, int shift1, char *num2){
 	if(number_shifted[strlen(number_shifted)-1] == '\n'){
 		number_shifted[strlen(number_shifted)-1] = '\0';
 	}
-	
-	//number_shifted[strlen(number_shifted)] = '\0';
 	
 	char zero[shift1];
 	

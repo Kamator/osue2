@@ -18,4 +18,4 @@ clean:
 	$(info Deleting executables...)
 	rm intmul
 	$(info Deleting txt files...)
-	rm *.txt
+	

@@ -23,7 +23,7 @@ static void usage();
 static void err_msg(char *msg);
 static int child(char *numa, char *numb,char *resp); 
 static char *combineResults(char *ah_bh, char *ah_bl, char *al_bh, char *al_bl, int len);
-static int calcExp(int a, int flag);
+static char *addNumbers(char *num1, int shift1, char *num2);
 
 char *prog_name;
 
@@ -53,7 +53,6 @@ int main (int argc, char *argv[]){
 
 	/*Check if number is only one digit long.*/
 	if(strlen(numa) <= 2 && strlen(numb) <= 2){
-
 		int fla = 0;
 		int flb = 0; 
 
@@ -87,12 +86,13 @@ int main (int argc, char *argv[]){
 		free(numb);
 
 		int res = vala*valb;
-		fprintf(stdout,"%X\n",res);
+		fprintf(stdout,"%X",res);
 		exit(EXIT_SUCCESS);
 	}
 
 	
 	/*Check if the numbers' size is even.*/
+	//+1!
 	if((((strlen(numa)+1)%2) != 0) || (((strlen(numb)+1)%2) != 0)){
 		free(numa);
 		free(numb);
@@ -100,7 +100,7 @@ int main (int argc, char *argv[]){
 	}
 
 	/*Split up numbers.*/
-	int len = strlen(numa)-1;
+	int len = strlen(numa)-1;  //because of newline
 	int halflen = len/2;
 	
 	char *ah = calloc(halflen,sizeof(char));
@@ -118,6 +118,8 @@ int main (int argc, char *argv[]){
 	char *res_3 = calloc(2*halflen+1,sizeof(char)); //al*bh
 	char *res_4 = calloc(2*halflen+1,sizeof(char)); //al*bl
 
+
+
 	int co1 = child(ah,bh,res_1);
 	int co2 = child(ah,bl,res_2);
 	int co3 = child(al,bh,res_3);
@@ -131,9 +133,24 @@ int main (int argc, char *argv[]){
 	//A*B = res_1 * 16^n + res_2 * 16^(n/2) + res_3 * 16^(n/2)
 	int n = strlen(numa)-1;
 
-	char *resultOfComputation = combineResults(res_1,res_2,res_3,res_4,n); 
+	char *resultOfComputation = calloc(2*len+1,sizeof(char));
+	resultOfComputation = combineResults(res_1,res_2,res_3,res_4,n); 
 
 	fprintf(stdout,"%s\n",resultOfComputation); 
+	
+	free(res_1);
+	free(res_2);
+	free(res_3);
+	free(res_4);
+
+	free(numa);
+	free(numb);
+
+	free(ah);
+	free(bh);
+	free(al);
+	free(bl);
+
 
 	exit(EXIT_SUCCESS);	
 	
@@ -143,59 +160,152 @@ int main (int argc, char *argv[]){
 
 static char *combineResults(char *ah_bh, char *ah_bl, char *al_bh, char *al_bl, int len){
 
-	char *response = calloc(2*len+1, sizeof(char));
+	char *res1 = addNumbers(al_bh,len/2,al_bl);
+		
+	char *res2 = addNumbers(ah_bl,len/2,res1);
 
-	for(int i = 0; i <= 2*len; i++){
-		response[i] = '0';
-	}
+	char *res3 = addNumbers(ah_bh,len,res2);
 
-	int len_ahbh = strlen(ah_bh);
-	int len_ahbl = strlen(ah_bl);
-	int len_albh = strlen(al_bh);
-	int len_albl = strlen(al_bl);
+	return res3;
 
-	//set al_bl directly (kind of like a offset)
+
+}
+
+static char *addNumbers(char *num1, int shift1, char *num2){
 	
-	for(int i = 0; i < len_albl;i++){
-		response[(2*n)-i] = al_bl[len_albl-i];
-		al_bl[len_albl-i] = '\0';
+	if(shift1 == 8){
+		int asdf;
 	}
 
-
-
-
-
-	return response;
-
-
-}
-
-static int calcExp(int n, int flag){
-	int ret = 1;
-	int half = n/2;
-	if(n % 2 != 0){
-		err_msg("Length of number not even!");
+	if(num1[strlen(num1)-1] == '\n'){
+		num1[strlen(num1)-1] = '\0';
 	}
-	//16^n
-	if(flag == 0){
-		for(;n > 0; n--){
-			ret *= 16;
+
+	//shift number1 to the left first	
+	char number_shifted[strlen(num1)+shift1];
+	sprintf(number_shifted,"%s",num1);
+	
+	if(number_shifted[strlen(number_shifted)-1] == '\n'){
+		number_shifted[strlen(number_shifted)-1] = '\0';
+	}
+	
+	//number_shifted[strlen(number_shifted)] = '\0';
+	
+	char zero[shift1];
+	
+	for(int i = 0; i < shift1; i++){
+		zero[i] = '0';
+	}
+	strcat(number_shifted,zero);
+	
+	number_shifted[strlen(num1)+shift1] = '\0';
+
+	char newNumber2[strlen(num2)];
+	sprintf(newNumber2,"%s",num2);
+
+	if(newNumber2[strlen(newNumber2)-1] == '\n'){
+		newNumber2[strlen(newNumber2)-1] = '\0';
+	}
+
+	newNumber2[strlen(newNumber2)] = '\0';
+
+	char *number2 = malloc(strlen(newNumber2)+strlen(number_shifted));
+	char *num_shifted = malloc(strlen(newNumber2)+strlen(number_shifted));
+
+	//numbers must have same length
+	if(strlen(newNumber2) != strlen(number_shifted)){
+		if(strlen(newNumber2) < strlen(number_shifted)){
+			int a = strlen(number_shifted);
+			int b = strlen(newNumber2);
+			int diff = a - b;
+			char help[strlen(number_shifted)];
+			for(int k = 0; k < diff; k++){
+				help[k] = '0';
+			}
+			help[diff] = '\0';
+			strcat(help,newNumber2);
+			strcpy(number2,help);
+			strncpy(num_shifted,number_shifted,strlen(number_shifted));
+		} else {
+			int diff = strlen(newNumber2)-strlen(number_shifted);
+			char help[strlen(newNumber2)];
+			for(int k = 0; k < diff; k++){
+				help[k] = '0';
+			}
+			help[diff] = '\0';
+			strcat(help,number_shifted);
+			strcpy(num_shifted,help);
+			strcpy(number2,newNumber2);
 		}
-	} else if (flag == 1){ //16^n/2
-		for(;n > half; n--){
-			ret *= 16;
-		}	
 	} else {
-		err_msg("Flag not passed correctly!");
+		strcpy(number2,newNumber2);
+		strcpy(num_shifted,number_shifted);
+	}
+	
+	//begin to Add
+
+	char *response = malloc(strlen(num_shifted)+strlen(number2));
+	if(response == NULL){
+		err_msg("malloc_1");
+	}
+	for(int k = 0; k < strlen(num_shifted); k++){
+		response[k] = '0';
 	}
 
-	return ret;
+	int carry = 0;
+	int digit1;
+	int digit2;
+	int temp_res;
+	char temp_hex[1];
+	char temp_str[2];
+	int res_digit;
+	int res_idx = strlen(response)-1;
+
+	int mem_len = strlen(num_shifted);
+
+	for(int k = 0; k < mem_len;k++){
+		digit1 = strtol(num_shifted+strlen(num_shifted)-1,NULL,16);
+		digit2 = strtol(number2+strlen(number2)-1,NULL,16);
+
+		temp_res = digit1 + digit2 + carry;
+		carry = temp_res/(0x10);
+		res_digit = temp_res%(0x10);
+		
+		sprintf(temp_str,"%X",res_digit);
+		strncpy(temp_hex,temp_str,1);
+	
+		response[res_idx] = temp_hex[0];
+		res_idx--;
+
+		num_shifted[strlen(num_shifted)-1] = '\0';
+		number2[strlen(number2)-1] = '\0';
+	}
+
+	if(carry != 0){
+		sprintf(temp_str,"%X",carry);
+		strncpy(temp_hex,temp_str,1);
+
+		char *fullResp = malloc((strlen(response)*strlen(temp_hex))*sizeof(char));
+		if(fullResp == NULL){
+			err_msg("malloc");
+		}
+
+
+		fullResp[0] = temp_hex[0];
+		strcat(fullResp,response);
+		return fullResp;
+
+
+	}
+	
+	return response;
+	
+
 
 }
 
- 
 static int child(char *numa, char *numb, char *resp){
-	int status = 0;
+
 	int readpipe[2];
 	int writepipe[2]; 
 
@@ -236,17 +346,22 @@ static int child(char *numa, char *numb, char *resp){
 			close(writepipe[1]);
 
 			//wait on child
-			if(waitpid(cpid,&status,0) == -1){
-				return EXIT_FAILURE;
+			pid_t pid;
+			int status;
+			pid = wait(&status);
+			if(WEXITSTATUS(status) != EXIT_SUCCESS){
+				char *resp = malloc(sizeof(char)*2000);
+				sprintf(resp,"waiting error .. pid = %d ... status =  %d",pid,WEXITSTATUS(status));
+				err_msg("waiting error");
 			}
 			
+			char *response = NULL;
 			readFrom = fdopen(readpipe[0], "r");
-			char *response;
-			size_t length;
+			size_t length = 0;
 			getline(&response,&length,readFrom);
-			strcpy(resp,response);
-			fclose(readFrom);
 			close(readpipe[0]);
+
+			strcpy(resp,response);
 			free(response);
 
 			return EXIT_SUCCESS; 

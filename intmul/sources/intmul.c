@@ -4,7 +4,9 @@
  * @date 18.12.2019
  *
  * @brief
- *
+ * This program reads two hexadecimal numbers and multiplies them. Their length has to be a power of 
+ * 2 in order for the seperation to work correctly. Each one of the numbers is split into two parts, 
+ * those are then multiplied and added back together using the stated formula.	
  *
  */
 
@@ -27,6 +29,17 @@ static char *addNumbers(char *num1, int shift1, char *num2);
 
 char *prog_name;
 
+/**
+ * Program entry point.
+ * @brief The program starts here. There is no spectacular synopsis to consider. At first, the input 
+ * needs to be checked. The input must not be an uneven number and the length must be a power of 2. 
+ *
+ * @details This is the  function that creates and executes the child-process. Also, the final result * of each step in the recursion is printed to stdout here.
+ *
+ * @param argc The argument counter.
+ * @param argv The Argument vector.
+ *
+ */
 
 int main (int argc, char *argv[]){
 	prog_name = argv[0];
@@ -158,6 +171,22 @@ int main (int argc, char *argv[]){
 	
 }
 
+/**
+ * Add results of the multiplications.
+ * @brief This function peforms the addition that's needed in the formual. It begins from the back
+ * by adding the last part with the part prior (that shifted n/2 times). 
+ *
+ * @details The principle works that the result of the prior multiplication is used for the next
+ * adition. This is the reason why 3 c-strings are needed here.
+ *
+ * @param ah_bh ah multiplied with bh
+ * @param ah_bl ah multiplied with bl
+ * @param al_bh al multiplied with bl
+ * @param al_bl al multiplied with bl
+ * @param len 	The length of the number that is worked with right now. 
+ *
+ */
+
 static char *combineResults(char *ah_bh, char *ah_bl, char *al_bh, char *al_bl, int len){
 
 	char *res1 = addNumbers(al_bh,len/2,al_bl);
@@ -167,9 +196,23 @@ static char *combineResults(char *ah_bh, char *ah_bl, char *al_bh, char *al_bl, 
 	char *res3 = addNumbers(ah_bh,len,res2);
 
 	return res3;
-
-
 }
+
+/**
+ * Add long hexadecimal numbers.
+ * @brief This function adds two hexadcimal numbers. It is possible to state a shift for the first
+ * number. No leading zeros are used. 	
+ * @details This function was specially built for the task to sum up hexadecimal numbers where one
+ * of the numbers needs to be shifted left. At first the first number is shifted to the left. Then
+ * it is checked if the numbers still have the same length. After ensuring that they have the same
+ * length they are summed up and the carry-bit is considered.
+ *
+ * @param num1 The first number suitable for the addition.
+ * @param shift1 The number of left shifts to peform.
+ * @param num2 The number that gets added to the first one. 
+ *
+ */
+
 
 static char *addNumbers(char *num1, int shift1, char *num2){
 
@@ -298,6 +341,24 @@ static char *addNumbers(char *num1, int shift1, char *num2){
 
 }
 
+/**
+ * Fork process and wait on result from child.
+ * @brief This function creates a new child-process and pastes needed information into the according
+ * streams.
+ *
+ * @details The parent process writes two numbers (multiplication from the split) into stdin of
+ * the child process. 
+ * The stdin of the parent gets piped to the stdout of the child. This is the result of the
+ * computation performed by the child. The parent process waits on the completion of the child.
+ *
+ * @param numa First number to be multiplied.
+ * @param numb Second number to be multiplied.
+ * @param resp The result of the multiplication.
+ * 
+ *
+ */
+
+
 static int child(char *numa, char *numb, char *resp){
 
 	int readpipe[2];
@@ -365,12 +426,27 @@ static int child(char *numa, char *numb, char *resp){
 	}
 }
 
+/**
+ * how to use the program
+ * @brief Just a synopsis function.
+ * @details not so interesting
+ *
+ */
 
 
 static void usage(){
 	printf("%s - Synopsis:\n intmul\n",prog_name);
 	exit(EXIT_FAILURE);
 }
+
+/**
+ * the error function
+ * @brief gets called if an error occured 
+ * @details gets a string and pastes it to stderr
+ * 
+ * @param msg the error message
+ *
+ */
 
 static void err_msg(char *msg){
 	fprintf(stderr,"%s: %s\n",prog_name,msg);

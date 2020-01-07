@@ -2,20 +2,31 @@
 # @file Makefile
 # @author Philipp Geisler <philpp.geisler@student.tuwien.ac.at> or <e11775812@student.tuwien.ac.at> 
 #
-# @date 18.12.2019
+# @date 07.01.2020
 #
 #
 
-all: 3coloring.o
-	gcc -o 3coloring  3coloring.o
+all: generator
 
-3coloring.o:
-	gcc -std=c99 -pedantic -Wall -D_DEFAULT_SOURCE -D_BSD_SOURCE -D_SVID_SOURCE -D_POSIX_C_SOURCE=200809L -g -c 3coloring.c
+generator: generator.o
+	gcc -o generator  generator.o
+
+supervisor: supervisor.o
+	gcc -o supervisor supervisor.o
+
+generator.o:
+	gcc -std=c99 -pedantic -Wall -D_DEFAULT_SOURCE -D_BSD_SOURCE -D_SVID_SOURCE -D_POSIX_C_SOURCE=200809L -g -c generator.c
+
+supervisor.o: 
+	gcc -std=c99 -pedantic -Wall -D_DEFAULT_SOURCE -D_BSD_SOURCE -D_SVID_SOURCE -D_POSIX_C_SOURCE=200809L -g -c supervisor.c
+
+
 
 clean:
 	$(info Deleting object files...)
 	rm *.o
 	$(info Deleting executables...)
-	rm 3coloring
+	rm generator
+	rm supervisor
 	$(info Deleting txt files...)
 	

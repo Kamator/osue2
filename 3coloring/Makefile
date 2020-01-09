@@ -6,13 +6,13 @@
 #
 #
 
-all: generator
+all: generator supervisor
 
 generator: generator.o
-	gcc -o generator  generator.o
+	gcc -o generator  generator.o -pthread -lrt
 
 supervisor: supervisor.o
-	gcc -o supervisor supervisor.o
+	gcc -o supervisor supervisor.o -pthread -lrt
 
 generator.o:
 	gcc -std=c99 -pedantic -Wall -D_DEFAULT_SOURCE -D_BSD_SOURCE -D_SVID_SOURCE -D_POSIX_C_SOURCE=200809L -g -c generator.c
@@ -28,5 +28,6 @@ clean:
 	$(info Deleting executables...)
 	rm generator
 	rm supervisor
-	$(info Deleting txt files...)
-	
+	$(info Deleting existing semaphores...)
+	rm /dev/shm/sem.sem_*
+	rm /dev/shm/sharedspace

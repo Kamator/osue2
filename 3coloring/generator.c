@@ -11,12 +11,27 @@
 #include <semaphore.h>
 #include <time.h>
 
+#define CIRC_BUF_LEN 60
+#define SEM_1 "/sem_1"
+#define SEM_2 "/sem_2"
+#define SHM_NAME "/sharedspace"
+
+struct circ{
+	unsigned int edgeCount;
+	unsigned int write_pos;
+	unsigned int read_pos;
+	char *solutions[];
+};
+
+
+
 char *prog_name;
 static void usage();
 static void err_msg(char *msg);
 static int getMax(char *arguments[], int len);
 
 static void createSendSolution(int maxIdx, int edges[][maxIdx]);
+static void sendToSupervisor(char *solution);
 
 int main(int argc, char *argv[]){
 	prog_name = argv[0];
@@ -95,17 +110,73 @@ static void createSendSolution(int maxIdx, int edges[][maxIdx+1]){
 				setEdges[edgeCount] = toAppend;
 				edgeCount++;
 			}
+			
+			if(edgeCount >= 8){
+				break;
+			}
+		}
+		if(edgeCount >= 8){
+			break;
 		}
 	}
+	
+	/*Check if graph is already 3-colorable*/
+	if(setEdges[0] == NULL){
+		setEdges[0] = "";
+	}
 
+	char *solution = malloc(sizeof(char)*strlen(setEdges[0])*8);
+	solution[0] = '\0';
+
+	for(int i = 0; i < 8 && setEdges[i] != NULL; i++){
+		strncat(solution,setEdges[i],strlen(setEdges[i]));
+	}
+
+	
 	/**
 	 * TO-DO: 
-	 * 1) Implement Supervisor with Circular Buffer
+	 * 1) Implement Supervisor with Circular Buffer DONE
 	 * 2) setEdges = Set of Edges that is sent to Circular Buffer
 	 * 3) edgeCount = Number of Edges in current solution
 	 */
 
+	sendToSupervisor(solution);
+
+
 	}	
+}
+
+
+static void sendToSupervisor(char *solution){
+	/*Open shared Memory*/
+	int fd = shm_open(SHM_NAME, O_RDWR | O_CREAT, 0600);
+
+	if (fd == -1){
+		close(fd);
+		shm_unlink(SHM_NAME);
+		err_msg("Could not open file descriptor.");
+	}
+
+	struct circ *circ_buf;
+
+	circ_buf = mmap(NULL,sizeof(*circ_buf),PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+	
+	if (circ_buf == MAP_FAILED){
+		close(fd);
+		shm_unlink(SHM_NAME);
+		err_msg("Could not map memory.");
+	}
+
+	/*Look for Semaphores*/
+	sem_t *free_sem = sem_open(SEM_1,0);
+	sem_t *used_sem = sem_open(SEM_2,0);
+
+	printf("waiting for free_sem\n");
+	sem_wait(free_sem);
+	circ_buf->solutions[circ_buf->write_pos] = solution;
+	sem_post(used_sem);
+	circ_buf->write_pos = (circ_buf->write_pos + 1) % CIRC_BUF_LEN;
+
 }
 
 static void usage(){

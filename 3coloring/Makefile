@@ -28,6 +28,4 @@ clean:
 	$(info Deleting executables...)
 	rm generator
 	rm supervisor
-	$(info Deleting existing semaphores...)
-	rm /dev/shm/sem.sem_*
-	rm /dev/shm/sharedspace
+

@@ -9,16 +9,16 @@
 all: generator supervisor
 
 generator: generator.o
-	gcc -o generator  generator.o -pthread -lrt
+	gcc -o generator  11775812_generator.o -pthread -lrt
 
 supervisor: supervisor.o
-	gcc -o supervisor supervisor.o -pthread -lrt
+	gcc -o supervisor 11775812_supervisor.o -pthread -lrt
 
 generator.o:
-	gcc -std=c99 -pedantic -Wall -D_DEFAULT_SOURCE -D_BSD_SOURCE -D_SVID_SOURCE -D_POSIX_C_SOURCE=200809L -g -c generator.c
+	gcc -std=c99 -pedantic -Wall -D_DEFAULT_SOURCE -D_BSD_SOURCE -D_SVID_SOURCE -D_POSIX_C_SOURCE=200809L -g -c 11775812_generator.c
 
 supervisor.o: 
-	gcc -std=c99 -pedantic -Wall -D_DEFAULT_SOURCE -D_BSD_SOURCE -D_SVID_SOURCE -D_POSIX_C_SOURCE=200809L -g -c supervisor.c
+	gcc -std=c99 -pedantic -Wall -D_DEFAULT_SOURCE -D_BSD_SOURCE -D_SVID_SOURCE -D_POSIX_C_SOURCE=200809L -g -c 11775812_supervisor.c
 
 
 
